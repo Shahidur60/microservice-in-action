@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  licensingservice:
+    image: ostock/licensing-service:0.0.1-SNAPSHOT
+    ports:
+      - "8080:8080"
+    depends_on:
+      - PostgreSQL
+    environment:
+      - "SPRING_PROFILES_ACTIVE=dev"
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/testlicense
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  PostgreSQL:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=testlicense

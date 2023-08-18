@@ -1,0 +1,69 @@
+spring:
+    application:
+     name: company
+    profiles:
+      active: dev
+    cloud:
+        config: 
+            uri: http://configserver:8071
+
+
+#management.endpoints.web.base-path=/
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+
+resilience4j.circuitbreaker:
+  instances:
+    company:
+      registerHealthIndicator: true
+      eventConsumerBufferSize: 10
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+      failureRateThreshold: 50
+      minimumNumberOfCalls: 5
+      permittedNumberOfCallsInHalfOpenState: 3
+      slidingWindowSize: 10
+      waitDurationInOpenState: 5s
+      slidingWindowType: COUNT_BASED
+#      recordExceptions:
+#        - org.springframework.web.client.HttpServerErrorException
+#        - java.io.IOException
+#        - java.util.concurrent.TimeoutException
+#        - org.springframework.web.client.ResourceAccessException
+
+resilience4j.bulkhead:
+  instances:
+    company:
+      maxWaitDuration: 5000
+      maxConcurrentCalls: 3
+
+#resilience4j.thread-pool-bulkhead:
+#  instances:
+#    company:
+#      maxThreadPoolSize: 1
+#      coreThreadPoolSize: 1
+#      queueCapacity: 1
+
+resilience4j.retry:
+  instances:
+    company:
+      maxRetryAttempts: 3
+      waitDuration: 5000
+
+resilience4j.ratelimiter:
+  instances:
+    company:
+      limitForPeriod: 2
+      limitRefreshPeriod: 4s
+      timeoutDuration: 0
+      registerHealthIndicator: true
+      eventConsumerBufferSize: 100

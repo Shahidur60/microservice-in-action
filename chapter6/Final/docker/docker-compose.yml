@@ -1,0 +1,124 @@
+version: '2.1'
+services:
+
+  configserver:
+    image: ostock/configserver:0.0.1-SNAPSHOT
+    ports:
+      - "8071:8071"
+    environment:
+      ENCRYPT_KEY: "fje83Ki8403Iod87dne7Yjsl3THueh48jfuO9j4U2hf64Lo"
+    healthcheck:
+      test: ""
+      interval: 10s
+      timeout: 10s
+      retries: 2
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+  eurekaserver:
+    image: ostock/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    healthcheck:
+      test: ""
+      interval: 10s
+      timeout: 10s
+      retries: 2
+    depends_on:
+      configserver:
+        condition: service_healthy
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
+
+  companyservice:
+    image: company:0.0.1-SNAPSHOT
+    environment:
+      PROFILE: "dev"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      CONFIGSERVER_PORT: "8071"
+      ENCRYPT_KEY: "IMSYMMETRIC"
+      SERVER_PORT: "8084"
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    ports:
+      - "8084:8084"
+    networks:
+      - backend
+  hrservice:
+    image: hr:0.0.1-SNAPSHOT
+    environment:
+      PROFILE: "dev"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      CONFIGSERVER_PORT: "8071"
+      ENCRYPT_KEY: "IMSYMMETRIC"
+      SERVER_PORT: "8085"
+    depends_on:
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+    ports:
+      - "8085:8085"
+    networks:
+      - backend
+#  hrservice1:
+#    image: hr:0.0.1-SNAPSHOT
+#    environment:
+#      PROFILE: "dev"
+#      CONFIGSERVER_URI: "http://configserver:8071"
+#      CONFIGSERVER_PORT: "8071"
+#      ENCRYPT_KEY: "IMSYMMETRIC"
+#      SERVER_PORT: "8087"
+#    depends_on:
+#      eurekaserver:
+#        condition: service_healthy
+#      configserver:
+#        condition: service_healthy
+#    ports:
+#      - "8087:8087"
+#    networks:
+#      - backend
+
+#  accountservice:
+#    image: account:0.0.1-SNAPSHOT
+#    environment:
+#      PROFILE: "dev"
+#      CONFIGSERVER_URI: "http://configserver:8071"
+#      CONFIGSERVER_PORT: "8071"
+#      ENCRYPT_KEY: "IMSYMMETRIC"
+#      SERVER_PORT: "8086"
+#    depends_on:
+#      eurekaserver:
+#        condition: service_healthy
+#      configserver:
+#        condition: service_healthy
+#    ports:
+#      - "8086:8086"
+#    networks:
+#      - backend
+#  accountservice1:
+#    image: account:0.0.1-SNAPSHOT
+#    environment:
+#      PROFILE: "dev"
+#      CONFIGSERVER_URI: "http://configserver:8071"
+#      CONFIGSERVER_PORT: "8071"
+#      ENCRYPT_KEY: "IMSYMMETRIC"
+#      SERVER_PORT: "8089"
+#    depends_on:
+#      eurekaserver:
+#        condition: service_healthy
+#      configserver:
+#        condition: service_healthy
+#    ports:
+#      - "8089:8089"
+#    networks:
+#      - backend
+networks:
+  backend:
+    driver: bridge
